@@ -1,0 +1,23 @@
+#!/usr/bin/env node
+'use strict';
+
+// use for testing on command-line
+
+const { pipe } = require('needful');
+const streamify = require('async-stream-generator');
+const { EOL } = require('os');
+const JSONStream = require('./index');
+
+async function* stringify(chunks) {
+    for await (const chunk of chunks) {
+        yield JSON.stringify(chunk);
+    }
+}
+
+async function* lines(chunks) {
+    for await (const chunk of chunks) {
+        yield chunk + EOL;
+    }
+}
+
+pipe(stringify, lines, streamify)(JSONStream()).pipe(process.stdout);

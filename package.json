@@ -1,0 +1,30 @@
+{
+  "name": "jitters",
+  "version": "0.0.0",
+  "description": "Takes a UTF-8 stream containing JSON values and converts in to an async iterator",
+  "main": "index.js",
+  "keywords": [
+    "json stream",
+    "json parser",
+    "json",
+    "streams",
+    "stream",
+    "async",
+    "parser"
+  ],
+  "author": "Mac Heller-Ogden",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/machellerogden/jitters.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "async-stream-generator": "^1.0.3",
+    "needful": "0.0.5"
+  }
+}
