@@ -1,0 +1,20 @@
+#!/usr/bin/env node
+'use strict';
+
+// cat ./test_data_1.txt | ./take 5
+
+const {
+    pipe,
+    partialRight
+} = require('needful');
+const { inspect } = require('util');
+const log = v => console.log(inspect(v, { depth: null, colors: true }))
+
+const {
+    read,
+    take
+} = require('..');
+
+const count = +process.argv[2];
+const isCollection = !!+process.argv[3];
+(async () => (await pipe(partialRight(read, isCollection), take(count))(process.stdin)).map(log))();

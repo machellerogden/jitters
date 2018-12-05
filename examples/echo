@@ -1,16 +1,18 @@
 #!/usr/bin/env node
 'use strict';
 
-// use for testing on command-line
+// cat ./test_data_1.txt | ./echo
 
 const { pipe } = require('needful');
 const streamify = require('async-stream-generator');
 const { EOL } = require('os');
-const JSONStream = require('./index');
+const { inspect } = require('util');
+
+const { JSONStream } = require('..');
 
 async function* stringify(chunks) {
     for await (const chunk of chunks) {
-        yield JSON.stringify(chunk);
+        yield inspect(chunk, { depth: null, colors: true });
     }
 }
 
@@ -20,4 +22,5 @@ async function* lines(chunks) {
     }
 }
 
-pipe(stringify, lines, streamify)(JSONStream()).pipe(process.stdout);
+const isCollection = !!+process.argv[2];
+pipe(stringify, lines, streamify)(JSONStream(isCollection)()).pipe(process.stdout);
