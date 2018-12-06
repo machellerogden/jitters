@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 
-// cat ./test_data_1.txt | ./take 5
+// cat ./examples/test_data_1.txt | ./examples/take 5
+// cat ./examples/test_data_2.txt | ./examples/take 5 1
 
 const {
     pipe,
@@ -11,10 +12,11 @@ const { inspect } = require('util');
 const log = v => console.log(inspect(v, { depth: null, colors: true }))
 
 const {
-    read,
-    take
+    Read,
+    Take
 } = require('..');
 
 const count = +process.argv[2];
-const isCollection = !!+process.argv[3];
-(async () => (await pipe(partialRight(read, isCollection), take(count))(process.stdin)).map(log))();
+const flatten = !!+process.argv[3];
+
+(async () => (await pipe(Read(flatten), Take(count))(process.stdin)).map(log))();

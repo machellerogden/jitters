@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 
-// cat ./test_data_1.txt | ./echo
+// cat ./examples/test_data_1.txt | ./examples/echo
+// cat ./examples/test_data_2.txt | ./examples/echo 1
 
 const { pipe } = require('needful');
 const streamify = require('async-stream-generator');
@@ -22,5 +23,6 @@ async function* lines(chunks) {
     }
 }
 
-const isCollection = !!+process.argv[2];
-pipe(stringify, lines, streamify)(JSONStream(isCollection)()).pipe(process.stdout);
+const flatten = !!+process.argv[2];
+
+pipe(stringify, lines, streamify)(JSONStream(flatten)()).pipe(process.stdout);

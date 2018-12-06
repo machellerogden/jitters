@@ -2,8 +2,8 @@
 'use strict';
 
 module.exports = {
-    read,
-    take,
+    Read,
+    Take,
     JSONStream
 };
 
@@ -11,12 +11,15 @@ const fs = require('fs');
 const { pipe } = require('needful');
 const streamify = require('async-stream-generator');
 
+const isArrayStart = v => v === '[';
+const isArrayEnd = v => v === ']';
 const isStructStart = v => [ '{', '[' ].includes(v);
 const isStructEnd = v => [ '}', ']' ].includes(v);
 const isComma = v => v === ',';
 
-function read(isCollection) {
-    return async function* _read(chunks) {
+function Read(flatten) {
+    let pending = true;
+    return async function* read(chunks) {
         let depth = 0;
         let result = '';
 
@@ -28,12 +31,11 @@ function read(isCollection) {
 
             let i = 0;
 
-            if (isCollection && !result.trim()) {
+            if (flatten && (pending || !result.trim())) {
                 const [ hit ] = /^\s*(\[)/.exec(str) || [];
                 if (hit) {
+                    pending = false;
                     str = str.slice(hit.length + 2);
-                } else {
-                    throw new Error(`expected collection. actual value recieved: ${str}`);
                 }
             }
 
@@ -41,12 +43,21 @@ function read(isCollection) {
 
             while (i < chars.length) {
 
-                // skip cases
-                if (isCollection && depth === 0 && (
-                        isStructEnd(chars[i]) ||
-                        isComma(chars[i]))) {
-                    i++;
-                    continue;
+                if (flatten && depth === 0) {
+                    if (pending && isArrayStart(chars[i])) {
+                        i++;
+                        pending = false;
+                        continue;
+                    }
+                    if (isComma(chars[i])) {
+                        i++;
+                        continue;
+                    }
+                    if (isArrayEnd(chars[i])) {
+                        i++;
+                        pending = true;
+                        continue;
+                    }
                 }
 
                 result += chars[i];
@@ -69,9 +80,9 @@ function read(isCollection) {
     };
 }
 
-function take(...args) {
+function Take(...args) {
     const [ count, iterator ] = args;
-    const fn = async function _take(it) {
+    const fn = async function take(it) {
         let results = [];
         let i = 0;
         while (i++ < count) {
@@ -86,11 +97,11 @@ function take(...args) {
         : fn;
 }
 
-function JSONStream(isCollection) {
+function JSONStream(flatten) {
     return function _JSONStream(stream = fs.createReadStream(null, {
         fd: 0,
         encoding: 'utf8'
     })) {
-        return pipe(read(isCollection), streamify)(stream);
+        return pipe(Read(flatten), streamify)(stream);
     };
 }
